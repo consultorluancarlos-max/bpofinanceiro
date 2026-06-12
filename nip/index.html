@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implantação BPO Financeiro — NIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1a5fa8; --blue-light: #e8f1fb; --blue-mid: #2e7dd1;
+    --green: #1a7f4b; --green-light: #eaf7f0;
+    --amber: #b45309; --amber-light: #fef9ec;
+    --gray: #6b7280; --gray-light: #f3f4f6;
+    --border: #e5e7eb; --text: #111827; --text-muted: #6b7280;
+    --bg: #f9fafb; --white: #ffffff; --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 15px; font-weight: 600; }
+  .topbar-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .topbar-sub { font-size: 12px; color: var(--text-muted); }
+  .topbar-date { font-size: 12px; color: var(--text-muted); }
+  .hero { background: var(--white); border-bottom: 1px solid var(--border); padding: 32px 24px 28px; }
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+  .hero-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+  .hero-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .hero-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+  .hero-meta span { margin-right: 16px; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .metric { background: var(--gray-light); border-radius: var(--radius); padding: 14px 16px; }
+  .metric-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+  .metric-value { font-size: 24px; font-weight: 600; line-height: 1; color: var(--text); }
+  .metric-value.blue { color: var(--blue); } .metric-value.amber { color: var(--amber); }
+  .progress-wrap { background: #e5e7eb; border-radius: 999px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; background: var(--blue); transition: width 1s ease; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 28px 24px 60px; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-btn { font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+  .etapa { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow); }
+  .etapa-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; }
+  .etapa-header:hover { background: var(--gray-light); }
+  .etapa-num { width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .etapa-num.concluida { background: var(--green-light); color: var(--green); }
+  .etapa-num.andamento { background: var(--blue-light); color: var(--blue); }
+  .etapa-num.nao-iniciada { background: var(--gray-light); color: var(--gray); }
+  .etapa-title { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+  .etapa-counter { font-size: 12px; color: var(--text-muted); }
+  .status-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; }
+  .status-badge.concluida { background: var(--green-light); color: var(--green); }
+  .status-badge.andamento { background: var(--blue-light); color: var(--blue); }
+  .status-badge.nao-iniciada { background: var(--gray-light); color: var(--gray); }
+  .chevron { font-size: 16px; color: var(--text-muted); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .etapa-body { display: none; border-top: 1px solid var(--border); padding: 0 20px 16px; }
+  .etapa-body.open { display: block; }
+  .etapa-desc { font-size: 13px; color: var(--text-muted); padding: 12px 0; font-style: italic; }
+  .task-list { display: flex; flex-direction: column; gap: 2px; }
+  .task { display: grid; grid-template-columns: 20px 1fr auto auto; align-items: start; gap: 10px; padding: 8px 10px; border-radius: 7px; }
+  .task.pendente-cliente { background: var(--amber-light); }
+  .task-icon { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; font-size: 9px; }
+  .task-icon.done { background: var(--green); border-color: var(--green); color: white; }
+  .task-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .task-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-obs { font-size: 11px; color: var(--amber); margin-top: 3px; font-style: italic; }
+  .resp-badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 999px; white-space: nowrap; margin-top: 2px; }
+  .resp-nos { background: var(--blue-light); color: var(--blue); }
+  .resp-cliente { background: var(--amber-light); color: var(--amber); border: 1px solid #fcd34d; }
+  .resp-ambos { background: var(--gray-light); color: var(--gray); }
+  .task-prazo { font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-top: 2px; }
+  .pend-section { background: var(--amber-light); border: 1px solid #fcd34d; border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
+  .pend-title { font-size: 13px; font-weight: 600; color: var(--amber); margin-bottom: 12px; }
+  .pend-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 13px; color: var(--text); }
+  .pend-item:last-child { border-bottom: none; }
+  .pend-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; margin-top: 6px; }
+  .pend-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; margin-top: 28px; }
+  .next-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .next-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text); }
+  .next-num { width: 20px; height: 20px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .footer { text-align: center; font-size: 12px; color: var(--text-muted); padding: 20px 24px 40px; border-top: 1px solid var(--border); }
+  @media (max-width: 600px) { .topbar { padding: 0 16px; } .hero { padding: 24px 16px 20px; } .main { padding: 20px 16px 40px; } .task { grid-template-columns: 20px 1fr; } .task-prazo { display: none; } }
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">BF</div>
+    <div>
+      <div class="topbar-name">BPO Financeiro</div>
+      <div class="topbar-sub">Acompanhamento de implantação</div>
+    </div>
+  </div>
+  <div class="topbar-date" id="emissao">Atualizado em —</div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Relatório de implantação</div>
+    <div class="hero-title" id="clienteNome">—</div>
+    <div class="hero-meta">
+      <span>Responsável: <strong id="clienteResp">—</strong></span>
+      <span>Início: <strong id="clienteInicio">—</strong></span>
+      <span>Prazo estimado: <strong id="clientePrazo">—</strong></span>
+    </div>
+    <div class="metrics" id="metricsEl"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progressLabel">0% concluído</span><span id="progressCount"></span></div>
+  </div>
+</div>
+<div class="main">
+  <div id="pendSection"></div>
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('todos',this)">Todas as tarefas</button>
+    <button class="filter-btn" onclick="setFilter('pendentes',this)">Pendentes</button>
+    <button class="filter-btn" onclick="setFilter('cliente',this)">Aguardando cliente</button>
+    <button class="filter-btn" onclick="setFilter('concluidas',this)">Concluídas</button>
+  </div>
+  <div id="etapasEl"></div>
+  <div class="section-label">Próximos passos</div>
+  <div class="next-list" id="nextEl"></div>
+  <div class="section-label">Considerações</div>
+  <p style="font-size:13px;color:var(--text-muted);line-height:1.7;" id="consideracoes"></p>
+</div>
+<div class="footer" id="footerEl"></div>
+<script>
+const DATA={cliente:"NIP — Neuro Instituto da Paraíba Ltda",responsavel:"Ivana Albuquerque",operador:"Luan Carlos",inicio:"11/06/2026",prazo:"30–45 dias",emissao:"12/06/2026",consideracoes:"A implantação evolui dentro do cronograma previsto. O avanço das etapas seguintes está condicionado à regularização dos acessos bancários pelo cliente. Após a resolução dessas pendências, estimamos a conclusão em 30 a 45 dias, conforme cronograma inicialmente apresentado.",proximosPassos:["Finalização das integrações bancárias (Banco do Brasil e Bradesco) após regularização dos acessos.","Parametrização completa do Conta Azul: plano de categorias, centros de custo e contas recorrentes.","Cadastro de clientes, fornecedores e contratos ativos.","Estruturação dos processos operacionais e fluxos de aprovação.","Início da operação assistida: conciliação, treinamento e validação dos relatórios."],etapas:[{titulo:"Estruturação inicial",descricao:"Criar o ambiente operacional para gestão financeira da empresa.",status:"concluida",tarefas:[{desc:"Criação da empresa no Conta Azul",done:true,resp:"nos",prazo:""},{desc:"Configurações iniciais da empresa",done:true,resp:"nos",prazo:""},{desc:"Levantamento das contas bancárias",done:true,resp:"ambos",prazo:""},{desc:"Reunião de alinhamento inicial",done:true,resp:"ambos",prazo:""},{desc:"Mapeamento preliminar dos processos financeiros",done:true,resp:"nos",prazo:""}]},{titulo:"Integrações bancárias e acessos",descricao:"Garantir acesso às movimentações financeiras para acompanhamento e gestão.",status:"andamento",tarefas:[{desc:"BB — Integração bancária iniciada",done:true,resp:"nos",prazo:""},{desc:"BB — Criação do usuário secundário",done:true,resp:"nos",prazo:""},{desc:"BB — Configuração de acesso para consulta",done:true,resp:"nos",prazo:""},{desc:"BB — Validação da senha transacional",done:false,resp:"cliente",prazo:"3–7 dias",obs:"Aguardando suporte do gerente da agência para validação da senha transacional."},{desc:"Bradesco — Integração bancária",done:false,resp:"cliente",prazo:"3–7 dias",obs:"Necessária redefinição ou recuperação da senha junto ao gerente da agência."},{desc:"Bradesco — Criação do usuário secundário",done:false,resp:"cliente",prazo:"3–7 dias"},{desc:"Bradesco — Liberação de acessos financeiros",done:false,resp:"cliente",prazo:"3–7 dias"}]},{titulo:"Estruturação financeira",descricao:"Parametrizar o sistema para refletir a realidade operacional da empresa.",status:"nao-iniciada",tarefas:[{desc:"Definição do plano de categorias financeiras",done:false,resp:"nos",prazo:"5–10 dias úteis"},{desc:"Estruturação de centros de custo",done:false,resp:"nos",prazo:"5–10 dias úteis"},{desc:"Cadastro de clientes",done:false,resp:"ambos",prazo:"5–10 dias úteis"},{desc:"Cadastro de fornecedores",done:false,resp:"ambos",prazo:"5–10 dias úteis"},{desc:"Cadastro de contas recorrentes",done:false,resp:"nos",prazo:"5–10 dias úteis"},{desc:"Cadastro de contratos recorrentes",done:false,resp:"ambos",prazo:"5–10 dias úteis"},{desc:"Parametrização de receitas recorrentes",done:false,resp:"nos",prazo:"5–10 dias úteis"},{desc:"Parametrização de despesas recorrentes",done:false,resp:"nos",prazo:"5–10 dias úteis"}]},{titulo:"Processos operacionais",descricao:"Estabelecer o fluxo de comunicação e envio de informações financeiras.",status:"nao-iniciada",tarefas:[{desc:"Definição dos responsáveis internos",done:false,resp:"cliente",prazo:"3–5 dias úteis"},{desc:"Definição dos fluxos de aprovação de pagamentos",done:false,resp:"ambos",prazo:"3–5 dias úteis"},{desc:"Definição dos prazos de envio de documentos",done:false,resp:"ambos",prazo:"3–5 dias úteis"},{desc:"Controle de movimentações em espécie",done:false,resp:"ambos",prazo:"3–5 dias úteis",obs:"Um responsável interno deverá encaminhar comprovantes de movimentações em dinheiro regularmente."},{desc:"Definição dos canais de comunicação operacional",done:false,resp:"ambos",prazo:"3–5 dias úteis"}]},{titulo:"Operação assistida",descricao:"Validar os processos implantados e iniciar a rotina operacional.",status:"nao-iniciada",tarefas:[{desc:"Conciliação financeira inicial",done:false,resp:"nos",prazo:"10–15 dias úteis"},{desc:"Conferência dos lançamentos",done:false,resp:"nos",prazo:"10–15 dias úteis"},{desc:"Ajustes de parametrização",done:false,resp:"nos",prazo:"10–15 dias úteis"},{desc:"Treinamento operacional dos envolvidos",done:false,resp:"ambos",prazo:"10–15 dias úteis"},{desc:"Validação dos relatórios gerenciais",done:false,resp:"ambos",prazo:"10–15 dias úteis"}]}]};
+const statusMap={concluida:{label:"Concluída",cls:"concluida"},andamento:{label:"Em andamento",cls:"andamento"},"nao-iniciada":{label:"Não iniciada",cls:"nao-iniciada"}};
+const respMap={nos:["Nossa equipe","resp-nos"],cliente:["Cliente","resp-cliente"],ambos:["Ambos","resp-ambos"]};
+let currentFilter="todos",expanded=new Set([1]);
+function allTasks(){return DATA.etapas.flatMap(e=>e.tarefas);}
+function render(){
+  const all=allTasks(),done=all.filter(t=>t.done).length,pct=Math.round(done/all.length*100);
+  const pendCliente=all.filter(t=>t.resp==="cliente"&&!t.done).length;
+  document.getElementById("clienteNome").textContent=DATA.cliente;
+  document.getElementById("clienteResp").textContent=DATA.responsavel;
+  document.getElementById("clienteInicio").textContent=DATA.inicio;
+  document.getElementById("clientePrazo").textContent=DATA.prazo;
+  document.getElementById("emissao").textContent="Atualizado em "+DATA.emissao;
+  document.getElementById("consideracoes").textContent=DATA.consideracoes;
+  document.getElementById("metricsEl").innerHTML=`<div class="metric"><div class="metric-label">Progresso geral</div><div class="metric-value blue">${pct}%</div></div><div class="metric"><div class="metric-label">Tarefas concluídas</div><div class="metric-value">${done}<span style="font-size:14px;font-weight:400;color:var(--text-muted)">/${all.length}</span></div></div><div class="metric"><div class="metric-label">Aguardando cliente</div><div class="metric-value amber">${pendCliente}</div></div><div class="metric"><div class="metric-label">Pendentes no total</div><div class="metric-value">${all.length-done}</div></div>`;
+  setTimeout(()=>{document.getElementById("progressFill").style.width=pct+"%";},100);
+  document.getElementById("progressLabel").textContent=pct+"% concluído";
+  document.getElementById("progressCount").textContent=done+" de "+all.length+" tarefas";
+  const pends=all.filter(t=>t.resp==="cliente"&&!t.done);
+  document.getElementById("pendSection").innerHTML=pends.length?`<div class="pend-section"><div class="pend-title">⚠ ${pends.length} ${pends.length===1?"item aguardando":"itens aguardando"} providência do cliente</div>${pends.map(t=>`<div class="pend-item"><div class="pend-dot"></div><div><div>${t.desc}</div>${t.obs?`<div class="pend-sub">${t.obs}</div>`:""}${t.prazo?`<div class="pend-sub">Prazo estimado: ${t.prazo}</div>`:""}</div></div>`).join("")}</div>`:"";
+  let html="";
+  DATA.etapas.forEach((et,ei)=>{
+    const vis=filterTarefas(et.tarefas);
+    if(currentFilter!=="todos"&&vis.length===0)return;
+    const si=statusMap[et.status],doneCnt=et.tarefas.filter(t=>t.done).length,isOpen=expanded.has(ei);
+    html+=`<div class="etapa" id="etapa-${ei}"><div class="etapa-header" onclick="toggleEtapa(${ei})"><div class="etapa-num ${si.cls}">${ei+1}</div><div class="etapa-title">${et.titulo}</div><div class="etapa-counter">${doneCnt}/${et.tarefas.length}</div><span class="status-badge ${si.cls}">${si.label}</span><span class="chevron${isOpen?" open":""}">▾</span></div><div class="etapa-body${isOpen?" open":""}"><div class="etapa-desc">${et.descricao}</div><div class="task-list">${vis.map(t=>{const[rl,rc]=respMap[t.resp]||["—","resp-ambos"];return`<div class="task${t.resp==="cliente"&&!t.done?" pendente-cliente":""}"><div class="task-icon${t.done?" done":""}">✓</div><div><div class="task-text${t.done?" done":""}">${t.desc}</div>${t.obs?`<div class="task-obs">${t.obs}</div>`:""}</div><span class="resp-badge ${rc}">${rl}</span>${t.prazo?`<span class="task-prazo">${t.prazo}</span>`:"<span></span>"}</div>`;}).join("")}</div></div></div>`;
+  });
+  document.getElementById("etapasEl").innerHTML=html;
+  document.getElementById("nextEl").innerHTML=DATA.proximosPassos.map((p,i)=>`<div class="next-item"><div class="next-num">${i+1}</div><div>${p}</div></div>`).join("");
+  document.getElementById("footerEl").innerHTML=`Gerado por <strong>${DATA.operador}</strong> — Consultor Financeiro &nbsp;·&nbsp; João Pessoa, PB &nbsp;·&nbsp; Emissão: ${DATA.emissao}`;
+}
+function filterTarefas(t){if(currentFilter==="pendentes")return t.filter(x=>!x.done);if(currentFilter==="cliente")return t.filter(x=>x.resp==="cliente"&&!x.done);if(currentFilter==="concluidas")return t.filter(x=>x.done);return t;}
+function toggleEtapa(i){if(expanded.has(i))expanded.delete(i);else expanded.add(i);render();}
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");render();}
+render();
+</script>
+</body>
+</html>
